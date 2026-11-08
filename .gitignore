@@ -1,0 +1,9 @@
+# 비밀값과 로컬 설정은 저장소에 올리지 않습니다
+config.js
+.env
+.env.*
+!.env.example
+dist/
+node_modules/
+.netlify/
+.DS_Store
