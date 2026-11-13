@@ -199,6 +199,24 @@ details summary{cursor:pointer;color:var(--ink-2);font:400 13px/1.5 var(--mono);
 /* 달력 */
 .cal-nav{display:flex;align-items:center;gap:6px}
 .cal-nav .btn{min-height:44px;min-width:44px;padding:0 13px}
+/* 달력 양옆 화살표: 달력 높이만큼 길고, 스크롤해도 화살표는 화면 가운데에 머뭅니다 */
+.cal-row{display:grid;grid-template-columns:56px minmax(0,1fr) 56px;gap:10px;align-items:stretch;margin:0 -66px}
+.side{display:block;border-radius:14px;color:var(--ink-2);transition:transform .5s cubic-bezier(.3,1.8,.45,1),background-color .18s,color .18s}
+.side span{position:sticky;top:calc(50vh - 22px);display:grid;place-items:center;width:44px;height:44px;margin:0 auto;border-radius:50%;box-shadow:inset 0 0 0 1px var(--rule)}
+.side svg{width:22px;height:22px}
+.side.next svg{transform:scaleX(-1)}
+.side:hover{background:var(--surface);color:var(--ink)}
+.side:hover span{background:var(--primary);color:var(--primary-ink);box-shadow:none}
+.side:active{transform:scale(.94);transition-duration:.09s}
+.side.prev:hover span{animation:nudgeL .6s ease-in-out infinite alternate}
+.side.next:hover span{animation:nudgeR .6s ease-in-out infinite alternate}
+@keyframes nudgeL{to{translate:-4px 0}}
+@keyframes nudgeR{to{translate:4px 0}}
+.cal.from-right{animation:calR .5s cubic-bezier(.22,1,.36,1)}
+.cal.from-left{animation:calL .5s cubic-bezier(.22,1,.36,1)}
+@keyframes calR{from{opacity:0;transform:translateX(48px)}}
+@keyframes calL{from{opacity:0;transform:translateX(-48px)}}
+@media (max-width:1320px){.cal-row{margin:0}}
 .cal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));border-top:1px solid var(--rule);border-bottom:1px solid var(--line)}
 .dow{padding:10px 6px;font:400 12px/1 var(--mono);color:var(--ink-3)}
 .day{min-height:118px;padding:8px 6px;border-top:1px solid var(--line);text-align:left;display:flex;flex-direction:column;gap:3px;min-width:0;border-radius:0}
@@ -301,6 +319,10 @@ dialog.closing::backdrop{opacity:0}
   .split.has-sel .split-list{display:none}
   .split:not(.has-sel) .split-detail{display:none}
   .day{min-height:88px;padding:5px 2px}
+  .cal-row{grid-template-columns:26px minmax(0,1fr) 26px;gap:4px}
+  .side{border-radius:9px}
+  .side span{width:26px;height:40px;border-radius:9px;top:calc(50vh - 20px)}
+  .side svg{width:18px;height:18px}
   .day .d{margin-left:0}
   .chip{font-size:10.5px;line-height:1.3;padding:3px 4px;border-radius:6px;white-space:normal;text-align:center}
   .req{padding:18px}
@@ -837,6 +859,7 @@ if (typeof module !== 'undefined') module.exports = Engine;
     return S.cal.filter(function (c) { return c.start_date <= iso && c.end_date >= iso && !(c.kind === 'full' && (w === 0 || w === 6)); })
       .sort(function (a, b) { return order[a.kind] - order[b.kind] || a.name.localeCompare(b.name, 'ko'); });
   }
+  var CHEV = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
   function viewCalendar() {
     var p = S.month.split('-').map(Number), first = S.month + '-01', lead = E.dayOfWeek(first), rng = monthRange(S.month);
     var cells = DOW.map(function (d) { return '<div class="dow">' + d + '</div>'; }).join('');
@@ -849,8 +872,10 @@ if (typeof module !== 'undefined') module.exports = Engine;
         (items.length > max ? '<span class="more">외 ' + (items.length - max) + '명</span>' : '') + '</button>';
     }
     return '<div class="head"><h1>' + p[0] + '년 ' + p[1] + '월</h1><div class="cal-nav">' +
-      '<button class="btn ghost" data-act="month" data-d="-1" aria-label="이전 달">‹</button><button class="btn ghost" data-act="month" data-d="0">오늘</button><button class="btn ghost" data-act="month" data-d="1" aria-label="다음 달">›</button></div></div>' +
-      '<div class="cal">' + cells + '</div><div class="legend"><span><span class="chip full">연차 이름</span> 하루</span><span><span class="chip">오전 이름</span> 반차</span><span><span class="chip pending">오후 이름</span> 승인 대기</span><span>날짜를 누르면 전체 명단과 신청 버튼이 나와요.</span></div>';
+      '<button class="btn ghost" data-act="month" data-d="0">오늘</button></div></div>' +
+      '<div class="cal-row"><button class="side prev" data-act="month" data-d="-1" aria-label="이전 달"><span>' + CHEV + '</span></button>' +
+      '<div class="cal' + (S.calDir ? ' from-' + S.calDir : '') + '">' + cells + '</div>' +
+      '<button class="side next" data-act="month" data-d="1" aria-label="다음 달"><span>' + CHEV + '</span></button></div><div class="legend"><span><span class="chip full">연차 이름</span> 하루</span><span><span class="chip">오전 이름</span> 반차</span><span><span class="chip pending">오후 이름</span> 승인 대기</span><span>날짜를 누르면 전체 명단과 신청 버튼이 나와요.</span></div>';
   }
   function statRows() {
     return S.employees.filter(function (e) { return !S.dept || e.department === S.dept; }).map(function (e) {
@@ -1096,9 +1121,12 @@ if (typeof module !== 'undefined') module.exports = Engine;
       openDlg('<form class="dlg" data-form="reject"><h2 id="dlg-title">' + h(e.name) + ' 님의 신청 반려</h2><p class="muted" style="margin-bottom:12px">' + rangeKo(r) + ' ' + whatKo(r) + '</p><label class="field"><span>반려 사유 (선택)</span><textarea name="note" maxlength="300" placeholder="직원에게 그대로 보여요"></textarea></label><div class="dlg-actions"><button type="button" class="btn ghost" data-act="close">닫기</button><button class="btn danger">반려</button></div></form>');
     },
     month: async function (d) {
+      var before = S.month;
       if (d.d === '0') S.month = S.asOf.slice(0, 7);
       else S.month = E.addMonths(S.month + '-01', Number(d.d)).slice(0, 7);
+      S.calDir = S.month > before ? 'right' : S.month < before ? 'left' : null;
       await act(function () { return Promise.resolve(); });
+      S.calDir = null;
     },
     openDay: function (d) { dayDialog(d.date); },
     csv: downloadCsv,
