@@ -31,8 +31,8 @@ if (hashes.length !== 2) fail('index.html 의 인라인 스크립트를 찾지 �
 const csp = [
   "default-src 'none'",
   `script-src 'self' ${hashes.join(' ')}`,
-  "style-src 'unsafe-inline' https://cdn.jsdelivr.net",
-  'font-src https://cdn.jsdelivr.net',
+  "style-src 'unsafe-inline' https://fonts.googleapis.com",
+  'font-src https://fonts.gstatic.com',
   'img-src data:',
   `connect-src ${url || "'none'"}`,
   "base-uri 'none'",
