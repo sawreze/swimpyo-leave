@@ -28,14 +28,17 @@
 /* 밤 모드: 자동이면 저녁 8시부터 아침 6시까지, 설정에서 직접 고를 수도 있습니다 */
 :root[data-theme=dark]{
     color-scheme:dark;
-    --bg:#16150e;--surface:#201f15;--surface-2:#2a281b;--line:#3a3725;--rule:#fcf8d7;
-    --ink:#fcf8d7;--ink-2:#d2cdaa;--ink-3:#a7a283;
-    --primary:#fcf8d7;--primary-ink:#1b1a16;
-    --good:#173a52;--good-ink:#bfdff3;--wait:#473a08;--wait-ink:#f6e592;--bad:#4d1c14;--bad-ink:#f6cdc3;
-    --chip-full:#fcf8d7;--chip-full-ink:#1b1a16;
+    --bg:#1a1740;--surface:#242052;--surface-2:#2e2a63;--line:#3b3678;--rule:#fcf8d7;
+    --ink:#fcf8d7;--ink-2:#d3cfea;--ink-3:#aaa5d2;
+    --primary:#fcf8d7;--primary-ink:#1a1740;
+    --tile-on:#1a1740;--tile-hold:rgba(26,23,64,.36);
+    --good:#1f4266;--good-ink:#c6e3f6;--wait:#4d4219;--wait-ink:#f6e592;--bad:#5a2130;--bad-ink:#f8cfd0;
+    --chip-full:#fcf8d7;--chip-full-ink:#1a1740;
     --bar:#fcf8d7;
-    --shadow:0 14px 40px rgba(0,0,0,.55);
+    --shadow:0 14px 40px rgba(6,4,30,.6);
 }
+:root[data-theme=dark] .testbar{background:#100e2b}
+:root[data-theme=dark] dialog::backdrop{background:rgba(8,6,32,.6)}
 body{transition:background-color .4s,color .4s}
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
@@ -637,7 +640,7 @@ if (typeof module !== 'undefined') module.exports = Engine;
     var m = themeMode(), dark = m === 'dark' || (m === 'auto' && isNight()), root = document.documentElement;
     if ((root.dataset.theme === 'dark') === dark && root.dataset.theme) return;
     root.dataset.theme = dark ? 'dark' : 'light';
-    var meta = document.querySelector('meta[name=theme-color]'); if (meta) meta.content = dark ? '#16150e' : '#fcf8d7';
+    var meta = document.querySelector('meta[name=theme-color]'); if (meta) meta.content = dark ? '#1a1740' : '#fcf8d7';
   }
   applyTheme();
   function clockHtml() {
