@@ -80,9 +80,10 @@ button{cursor:pointer;background:none;border:0;padding:0}
 .head h1{font:300 clamp(34px,5vw,56px)/1.15 var(--serif);letter-spacing:-.02em}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;padding:0 18px;border-radius:9px;font:500 13px/1 var(--mono)}
 /* 쫀득한 누름: 누를 때는 빠르게 눌리고, 뗄 때는 살짝 튕기며 돌아옵니다 */
-.btn,.tab,.link,.row,.day,.textbtn,.namebtn,.seg span,.search,.filters select{transition:transform .5s cubic-bezier(.3,1.8,.45,1),background-color .18s,box-shadow .18s}
+.btn,.tab,.link,.row,.day,button.brand,.textbtn,.namebtn,.seg span,.search,.filters select{transition:transform .5s cubic-bezier(.3,1.8,.45,1),background-color .18s,box-shadow .18s}
 .btn:hover{transform:scale(1.03)}
-.btn:active,.tab:active,.link:active,.textbtn:active,.namebtn:active{transform:scale(.9);transition-duration:.09s}
+button.brand{min-height:44px}
+.btn:active,button.brand:active,.tab:active,.link:active,.textbtn:active,.namebtn:active{transform:scale(.9);transition-duration:.09s}
 .day:active{transform:scale(.9);transition-duration:.09s}
 .row:active{transform:scale(.975);transition-duration:.09s}
 .seg label:active span{transform:scale(.92);transition-duration:.09s}
@@ -835,7 +836,7 @@ if (typeof module !== 'undefined') module.exports = Engine;
       test = '<div class="testbar"><b>PC 테스트 모드</b><span class="note">이 브라우저에만 저장돼요</span><label>보는 사람 <select data-change="viewAs"><option value="admin">관리자</option>' + d.employees.map(function (e) { return '<option value="' + e.id + '"' + (v === e.id ? ' selected' : '') + '>직원: ' + h(e.name) + '</option>'; }).join('') + '</select></label>' +
         '<label>기준일 <input type="date" value="' + S.asOf + '" data-change="asOf"></label>' + (S.simulated ? '<button data-act="todayReset">오늘로 돌아가기</button>' : '') + '<button data-act="resetAll">데이터 초기화</button></div>';
     }
-    return test + '<header class="top"><div class="top-in"><div class="brand">' + LOGO + '쉼표</div><nav class="tabs" aria-label="주요 메뉴">' + tabs + '</nav><div class="top-end"><time class="clock num" id="clock" aria-label="현재 시각">' + clockHtml() + '</time><span class="weather num" id="weather">' + weatherHtml() + '</span><button class="link" data-act="rules">연차 규칙</button>' + (CLOUD ? '<button class="link" data-act="signOut">로그아웃</button>' : '') + '</div></div></header>' +
+    return test + '<header class="top"><div class="top-in"><button class="brand" data-act="home" aria-label="쉼표, 메인 화면으로">' + LOGO + '쉼표</button><nav class="tabs" aria-label="주요 메뉴">' + tabs + '</nav><div class="top-end"><time class="clock num" id="clock" aria-label="현재 시각">' + clockHtml() + '</time><span class="weather num" id="weather">' + weatherHtml() + '</span><button class="link" data-act="rules">연차 규칙</button>' + (CLOUD ? '<button class="link" data-act="signOut">로그아웃</button>' : '') + '</div></div></header>' +
       '<main class="wrap">' + body + '</main><nav class="tabbar" aria-label="주요 메뉴">' + tabs + '</nav>';
   }
   function welcome() {
@@ -993,6 +994,7 @@ if (typeof module !== 'undefined') module.exports = Engine;
     toast('CSV를 내려받았어요.');
   }
   var acts = {
+    home: function () { var t = tabsFor(); if (t.length) S.view = t[0][0]; S.sel = null; render.key = null; window.scrollTo(0, 0); render(); },
     tab: function (d) { S.view = d.v; window.scrollTo(0, 0); render(); },
     close: closeDlg,
     rules: rulesDialog,
