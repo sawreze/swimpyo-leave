@@ -34,7 +34,7 @@ const csp = [
   "style-src 'unsafe-inline' https://fonts.googleapis.com",
   'font-src https://fonts.gstatic.com',
   'img-src data:',
-  `connect-src ${url || "'none'"}`,
+  `connect-src https://api.open-meteo.com${url ? ' ' + url : ''}`,
   "base-uri 'none'",
   "form-action 'none'",
   "frame-ancestors 'none'",
