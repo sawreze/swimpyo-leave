@@ -25,8 +25,8 @@
   --sans:"IBM Plex Sans KR",-apple-system,"Apple SD Gothic Neo","Malgun Gothic","Noto Sans CJK KR",sans-serif;
   --mono:"IBM Plex Mono","IBM Plex Sans KR",ui-monospace,Menlo,Consolas,"Malgun Gothic","Noto Sans CJK KR",monospace;
 }
-@media (prefers-color-scheme:dark){
-  :root{
+/* 밤 모드: 자동이면 저녁 8시부터 아침 6시까지, 설정에서 직접 고를 수도 있습니다 */
+:root[data-theme=dark]{
     color-scheme:dark;
     --bg:#16150e;--surface:#201f15;--surface-2:#2a281b;--line:#3a3725;--rule:#fcf8d7;
     --ink:#fcf8d7;--ink-2:#d2cdaa;--ink-3:#a7a283;
@@ -35,8 +35,8 @@
     --chip-full:#fcf8d7;--chip-full-ink:#1b1a16;
     --bar:#fcf8d7;
     --shadow:0 14px 40px rgba(0,0,0,.55);
-  }
 }
+body{transition:background-color .4s,color .4s}
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
 body{margin:0;background:var(--bg);color:var(--ink);font:400 15px/1.6 var(--sans);word-break:keep-all;overflow-x:clip;-webkit-font-smoothing:antialiased}
@@ -74,6 +74,8 @@ button{cursor:pointer;background:none;border:0;padding:0}
 .weather svg{width:17px;height:17px;flex:none}
 .link{padding:8px 12px;border-radius:8px;color:var(--ink-2);font:400 13px/1 var(--mono);min-height:40px}
 .link:hover{background:var(--surface)}
+.link.icon{padding:8px;min-width:40px;display:inline-grid;place-items:center}
+.link.icon svg{width:19px;height:19px}
 .wrap{max-width:1180px;margin:auto;padding:34px 20px 90px}
 .narrow{max-width:760px;margin:auto}
 .head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:26px;flex-wrap:wrap}
@@ -628,6 +630,16 @@ if (typeof module !== 'undefined') module.exports = Engine;
 
   /* ---------- 상태 ---------- */
   var S = { employees: [], requests: [], cal: [], view: null, sel: null, asOf: realToday(), simulated: false, q: '', month: realToday().slice(0, 7), year: Number(realToday().slice(0, 4)), dept: '', auth: 'in', authNotice: '', litKey: null, ready: false, loadError: '' };
+  var THEME_KEY = 'swimpyo.theme', GEAR = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" d="M12 8.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7zM19.4 13.5a7.6 7.6 0 0 0 0-3l2-1.5-2-3.5-2.3 1a7.6 7.6 0 0 0-2.6-1.5L14 2.5h-4l-.5 2.5a7.6 7.6 0 0 0-2.6 1.5l-2.3-1-2 3.5 2 1.5a7.6 7.6 0 0 0 0 3l-2 1.5 2 3.5 2.3-1a7.6 7.6 0 0 0 2.6 1.5l.5 2.5h4l.5-2.5a7.6 7.6 0 0 0 2.6-1.5l2.3 1 2-3.5z"/></svg>';
+  function themeMode() { var v = storeGet(THEME_KEY); return v === 'light' || v === 'dark' ? v : 'auto'; }
+  function isNight() { var hr = new Date().getHours(); return hr >= 20 || hr < 6; }
+  function applyTheme() {
+    var m = themeMode(), dark = m === 'dark' || (m === 'auto' && isNight()), root = document.documentElement;
+    if ((root.dataset.theme === 'dark') === dark && root.dataset.theme) return;
+    root.dataset.theme = dark ? 'dark' : 'light';
+    var meta = document.querySelector('meta[name=theme-color]'); if (meta) meta.content = dark ? '#16150e' : '#fcf8d7';
+  }
+  applyTheme();
   function clockHtml() {
     var d = new Date(), z = function (v) { return String(v).padStart(2, '0'); };
     return '<span class="clock-date">' + (d.getMonth() + 1) + '월 ' + d.getDate() + '일 (' + DOW[d.getDay()] + ')</span> ' + z(d.getHours()) + ':' + z(d.getMinutes()) + ':' + z(d.getSeconds());
@@ -651,7 +663,7 @@ if (typeof module !== 'undefined') module.exports = Engine;
       }).catch(function () { /* 날씨를 못 받아도 앱은 그대로 동작합니다 */ });
   }
   loadWeather(); setInterval(loadWeather, 10 * 60 * 1000);
-  setInterval(function () { var c = document.getElementById('clock'); if (c) c.innerHTML = clockHtml(); }, 1000);
+  setInterval(function () { var c = document.getElementById('clock'); if (c) c.innerHTML = clockHtml(); applyTheme(); }, 1000);
   function me() { return db.me(); }
   function isDesktop() { return window.matchMedia('(min-width:900px)').matches; }
   function reqsOf(id) { return S.requests.filter(function (r) { return r.employee_id === id; }); }
@@ -836,7 +848,7 @@ if (typeof module !== 'undefined') module.exports = Engine;
       test = '<div class="testbar"><b>PC 테스트 모드</b><span class="note">이 브라우저에만 저장돼요</span><label>보는 사람 <select data-change="viewAs"><option value="admin">관리자</option>' + d.employees.map(function (e) { return '<option value="' + e.id + '"' + (v === e.id ? ' selected' : '') + '>직원: ' + h(e.name) + '</option>'; }).join('') + '</select></label>' +
         '<label>기준일 <input type="date" value="' + S.asOf + '" data-change="asOf"></label>' + (S.simulated ? '<button data-act="todayReset">오늘로 돌아가기</button>' : '') + '<button data-act="resetAll">데이터 초기화</button></div>';
     }
-    return test + '<header class="top"><div class="top-in"><button class="brand" data-act="home" aria-label="쉼표, 메인 화면으로">' + LOGO + '쉼표</button><nav class="tabs" aria-label="주요 메뉴">' + tabs + '</nav><div class="top-end"><time class="clock num" id="clock" aria-label="현재 시각">' + clockHtml() + '</time><span class="weather num" id="weather">' + weatherHtml() + '</span><button class="link" data-act="rules">연차 규칙</button>' + (CLOUD ? '<button class="link" data-act="signOut">로그아웃</button>' : '') + '</div></div></header>' +
+    return test + '<header class="top"><div class="top-in"><button class="brand" data-act="home" aria-label="쉼표, 메인 화면으로">' + LOGO + '쉼표</button><nav class="tabs" aria-label="주요 메뉴">' + tabs + '</nav><div class="top-end"><time class="clock num" id="clock" aria-label="현재 시각">' + clockHtml() + '</time><span class="weather num" id="weather">' + weatherHtml() + '</span><button class="link" data-act="rules">연차 규칙</button><button class="link icon" data-act="settings" aria-label="설정">' + GEAR + '</button>' + (CLOUD ? '<button class="link" data-act="signOut">로그아웃</button>' : '') + '</div></div></header>' +
       '<main class="wrap">' + body + '</main><nav class="tabbar" aria-label="주요 메뉴">' + tabs + '</nav>';
   }
   function welcome() {
@@ -976,6 +988,12 @@ if (typeof module !== 'undefined') module.exports = Engine;
     openDlg('<div class="dlg"><h2 id="dlg-title">연차 규칙</h2>' + rows.map(function (r) { return '<div class="rule"><span>' + r[0] + '</span><b class="num">' + r[1] + '</b></div>'; }).join('') +
       '<p class="muted small" style="margin:12px 0 16px">발생일은 입사일과 같은 날짜예요. 그 달에 같은 날짜가 없으면 말일에 발생해요. 잔여가 25개를 넘는 만큼은 사라져요. 신청한 연차는 승인되면 시작일에 차감돼요.</p><div class="dlg-actions"><button class="btn ghost" data-act="close">닫기</button></div></div>');
   }
+  function settingsDialog() {
+    var m = themeMode(), opts = [['auto', '자동'], ['light', '낮'], ['dark', '밤']];
+    openDlg('<div class="dlg"><h2 id="dlg-title">설정</h2><div class="field"><span>화면 모드</span></div>' +
+      '<div class="seg" role="radiogroup" aria-label="화면 모드">' + opts.map(function (o) { return '<label><input type="radio" name="theme" data-change="theme" value="' + o[0] + '"' + (o[0] === m ? ' checked' : '') + '><span>' + o[1] + '</span></label>'; }).join('') + '</div>' +
+      '<p class="muted small" style="margin:0 0 16px">자동은 저녁 8시부터 아침 6시까지 밤 모드로 바뀌어요. 이 브라우저에만 저장돼요.</p><div class="dlg-actions"><button class="btn ghost" data-act="close">닫기</button></div></div>');
+  }
   function dayDialog(iso) {
     var items = dayItems(iso), m = me();
     var canAdd = m.isAdmin ? S.employees.length > 0 : !!m.employeeId;
@@ -998,6 +1016,7 @@ if (typeof module !== 'undefined') module.exports = Engine;
     tab: function (d) { S.view = d.v; window.scrollTo(0, 0); render(); },
     close: closeDlg,
     rules: rulesDialog,
+    settings: settingsDialog,
     confirmYes: async function () { var f = confirmFn; confirmFn = null; closeDlg(); if (f) await f(); },
     loadSample: async function () { var d = Local.read(); Object.assign(d, sampleData(S.asOf)); d.viewAs = 'admin'; Local.save(); S.view = 'inbox'; await refresh(); render(); },
     startEmpty: async function () { Local.read().started = true; Local.save(); S.view = 'staff'; await refresh(); render(); },
@@ -1099,6 +1118,7 @@ if (typeof module !== 'undefined') module.exports = Engine;
   });
   document.addEventListener('change', async function (e) {
     var k = e.target.dataset.change; if (!k) return;
+    if (k === 'theme') { if (e.target.value === 'auto') storeDel(THEME_KEY); else storeSet(THEME_KEY, e.target.value); applyTheme(); return; }
     if (k === 'year') { S.year = Number(e.target.value); render(); }
     if (k === 'dept') { S.dept = e.target.value; render(); }
     if (k === 'viewAs') { var d = Local.read(); d.viewAs = e.target.value; Local.save(); S.view = null; S.sel = null; S.litKey = null; await refresh(); render(); }
