@@ -82,21 +82,25 @@ button{cursor:pointer;background:none;border:0;padding:0}
 .testbar select option{color:#1b1a16;background:#fff}
 .testbar button{color:#fff;text-decoration:underline;text-underline-offset:3px;min-height:30px}
 .top{position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--bg) 90%,transparent);backdrop-filter:blur(14px)}
-.top-in{max-width:1180px;margin:auto;padding:0 20px;height:72px;display:flex;align-items:center;gap:28px}
+.top-in{max-width:1180px;margin:auto;padding:0 20px;height:76px;display:flex;align-items:center;gap:32px}
 .brand{display:flex;align-items:center;gap:10px;font:500 22px/1 var(--serif);letter-spacing:-.01em}
 .brand svg{width:30px;height:30px;flex:none}
-.tabs{display:flex;gap:2px;background:var(--surface);border-radius:10px;padding:4px 8px;margin:0 auto}
-.tab{position:relative;padding:6px 12px;font:400 13px/1 var(--mono);color:var(--ink-3);min-height:40px}
+/* 상단 메뉴: 남은 폭을 모두 채우는 한 줄 위에 제목 글꼴로만 놓고, 지금 있는 메뉴만 선이 굵어집니다 */
+.tabs{position:relative;flex:1;display:flex;border-top:1px solid var(--rule);align-self:center;margin-top:-12px}
+.tab{position:relative;flex:1;padding:12px 4px 2px;font:400 18px/1.2 var(--serif);letter-spacing:-.01em;color:var(--ink-3);min-height:44px;text-align:left}
 .tab:hover{color:var(--ink)}
-.tab[aria-current=page]{color:var(--ink);text-decoration:underline;text-decoration-thickness:1.5px;text-underline-offset:7px}
-.badge{display:inline-grid;place-items:center;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--ink);color:var(--bg);font:500 11px/1 var(--mono);margin-left:6px}
+.tab[aria-current=page]{color:var(--ink)}
+/* 지금 메뉴 위의 굵은 선: 메뉴를 옮기면 물방울처럼 늘어났다 뭉치며 따라갑니다 */
+.ink{position:absolute;top:-3px;left:0;height:5px;width:0;border-radius:99px;background:var(--rule);pointer-events:none;transform-origin:50% 50%}
+.badge{display:inline-grid;place-items:center;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--ink);color:var(--bg);font:400 12px/1 var(--serif);margin-left:6px;vertical-align:2px}
 .top-end{display:flex;align-items:center;gap:6px}
-.clock{font:400 13px/1 var(--mono);color:var(--ink);white-space:nowrap;padding:0 6px}
+.clock{font:400 16px/1 var(--serif);font-variant-numeric:tabular-nums;color:var(--ink);white-space:nowrap;padding:0 6px}
 .clock-date{color:var(--ink-3);margin-right:4px}
-.weather{display:inline-flex;align-items:center;gap:5px;font:400 13px/1 var(--mono);white-space:nowrap;padding:0 6px}
+@media (max-width:1120px){.top .clock-date{display:none}}
+.weather{display:inline-flex;align-items:center;gap:5px;font:400 16px/1 var(--serif);white-space:nowrap;padding:0 6px}
 .weather:empty{display:none}
 .weather svg{width:17px;height:17px;flex:none}
-.link{padding:8px 12px;border-radius:8px;color:var(--ink-2);font:400 13px/1 var(--mono);min-height:40px}
+.link{white-space:nowrap;padding:8px 10px;border-radius:8px;color:var(--ink-2);font:400 16px/1 var(--serif);min-height:40px}
 .link:hover{background:var(--surface)}
 .link.icon{padding:8px;min-width:40px;display:inline-grid;place-items:center}
 .link.icon svg{width:19px;height:19px}
@@ -304,11 +308,14 @@ dialog.closing::backdrop{opacity:0}
 
 @media (max-width:899px){
   .wrap{padding:22px 16px 96px}
-  .top-in{height:58px;padding:0 16px;justify-content:space-between}
+  .top-in{height:58px;padding:0 16px;justify-content:space-between;gap:10px}
+  .clock,.weather,.link{font-size:15px}
+  .link{padding:8px 6px}
   .top .tabs{display:none}
   .clock-date{display:none}
   .tabbar{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;position:fixed;left:0;right:0;bottom:0;z-index:6;background:var(--surface);border-top:1px solid var(--rule);padding:4px 6px calc(4px + env(safe-area-inset-bottom))}
-  .tabbar .tab{padding:8px 2px;min-height:52px;font-size:12.5px}
+  .tabbar .tab{padding:12px 2px 8px;min-height:54px;font-size:15px;text-align:center}
+  .tabbar .ink{top:-3px}
   .tabbar .badge{height:16px;min-width:16px;font-size:10px;margin-left:3px;padding:0 4px}
   .hero{grid-template-columns:1fr;padding:0 0 30px;gap:30px}
   .hero>.tiles{max-width:200px;margin-left:8px;padding:14px;border-width:8px;--gap:6px}
@@ -956,9 +963,39 @@ if (typeof module !== 'undefined') module.exports = Engine;
     var body = { me: viewMe, inbox: viewInbox, calendar: viewCalendar, stats: viewStats, staff: viewStaff }[S.view]();
     var keepQ = document.activeElement && document.activeElement.id === 'staff-q';
     root.innerHTML = shell(body);
+    placeInk();
     var vk = S.view + (S.view === 'calendar' ? S.month : '') + (S.view === 'stats' ? S.year + '|' + (S.dept || '') : '');
     if (vk !== render.key) { render.key = vk; var w = root.querySelector('.wrap'); if (w) w.classList.add('enter'); }
     if (keepQ) { var q = document.getElementById('staff-q'); if (q) { q.focus(); q.setSelectionRange(q.value.length, q.value.length); } }
+  }
+  var inkPrev = {};
+  function placeInk() {
+    [['.top .tabs', 0], ['.tabbar', .22]].forEach(function (c) {
+      var box = document.querySelector(c[0]); if (!box) return;
+      var cur = box.querySelector('.tab[aria-current=page]'); if (!cur) return;
+      var b = box.getBoundingClientRect(), r = cur.getBoundingClientRect();
+      var to = { l: r.left - b.left + r.width * c[1], w: r.width * (1 - 2 * c[1]) };
+      if (!to.w) return;
+      var ink = document.createElement('i'); ink.className = 'ink'; ink.setAttribute('aria-hidden', 'true'); box.appendChild(ink);
+      ink.style.left = to.l + 'px'; ink.style.width = to.w + 'px';
+      var from = inkPrev[c[0]]; inkPrev[c[0]] = to;
+      if (calm()) return;
+      if (!from) { ink.animate([{ transform: 'scaleX(0)' }, { transform: 'scaleX(1.06) scaleY(1.4)', offset: .55 }, { transform: 'none' }], { duration: 520, easing: 'cubic-bezier(.22,1,.36,1)' }); return; }
+      if (Math.abs(from.l - to.l) < 1) return;
+      var dir = to.l > from.l ? 1 : -1, c0 = to.l + to.w / 2, w = to.w;
+      function k(L, R, sy, off, ease) { return { left: L + 'px', width: (R - L) + 'px', transform: 'scaleY(' + sy + ')', offset: off, easing: ease }; }
+      function at(cx, ww, sy, off, ease) { return k(cx - ww / 2, cx + ww / 2, sy, off, ease); }
+      var stretch = dir > 0 ? k(from.l + (to.l - from.l) * .12, to.l + to.w, .45, .38, 'cubic-bezier(.5,0,.3,1)')
+                            : k(to.l, from.l + from.w + (to.l + to.w - from.l - from.w) * .12, .45, .38, 'cubic-bezier(.5,0,.3,1)');
+      ink.animate([
+        k(from.l, from.l + from.w, 1, 0, 'cubic-bezier(.6,0,.4,1)'),
+        stretch,
+        at(c0 + dir * w * .03, w * 1.06, 1.8, .6, 'ease-in-out'),
+        at(c0 - dir * w * .03, w * .9, .7, .76, 'ease-in-out'),
+        at(c0, w * 1.04, 1.15, .89, 'ease-in-out'),
+        at(c0, w, 1, 1)
+      ], { duration: 760 });
+    });
   }
   function msgScreen(title, body, logout) {
     return '<div class="welcome"><div style="max-width:30em"><div class="brand">' + LOGO + '쉼표</div><h1 style="font-size:32px">' + h(title) + '</h1><p>' + h(body) + '</p>' + (logout ? '<button class="btn quiet" data-act="signOut">로그아웃</button>' : '') + '</div></div>';
