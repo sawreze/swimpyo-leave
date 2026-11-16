@@ -86,12 +86,13 @@ button{cursor:pointer;background:none;border:0;padding:0}
 .brand{display:flex;align-items:center;gap:10px;font:500 22px/1 var(--serif);letter-spacing:-.01em}
 .brand svg{width:30px;height:30px;flex:none}
 /* 상단 메뉴: 남은 폭을 모두 채우는 한 줄 위에 제목 글꼴로만 놓고, 지금 있는 메뉴만 선이 굵어집니다 */
-.tabs{position:relative;flex:1;display:flex;border-top:1px solid var(--rule);align-self:center;margin-top:-12px}
-.tab{position:relative;flex:1;padding:12px 4px 2px;font:400 18px/1.2 var(--serif);letter-spacing:-.01em;color:var(--ink-3);min-height:44px;text-align:left}
+.tabs{position:relative;flex:1;display:flex;align-self:center;margin-top:10px}
+.tabs::after{content:"";position:absolute;left:0;right:0;bottom:0;height:1px;background:var(--rule)}
+.tab{position:relative;flex:1;padding:2px 4px 12px;font:400 18px/1.2 var(--serif);letter-spacing:-.01em;color:var(--ink-3);min-height:44px;text-align:center}
 .tab:hover{color:var(--ink)}
 .tab[aria-current=page]{color:var(--ink)}
 /* 지금 메뉴 위의 굵은 선: 메뉴를 옮기면 물방울처럼 늘어났다 뭉치며 따라갑니다 */
-.ink{position:absolute;top:-3px;left:0;height:5px;width:0;border-radius:99px;background:var(--rule);pointer-events:none;transform-origin:50% 50%}
+.ink{position:absolute;z-index:1;bottom:-2px;left:0;height:5px;width:0;border-radius:99px;background:var(--rule);pointer-events:none;transform-origin:50% 50%}
 .badge{display:inline-grid;place-items:center;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--ink);color:var(--bg);font:400 12px/1 var(--serif);margin-left:6px;vertical-align:2px}
 .top-end{display:flex;align-items:center;gap:6px}
 .clock{font:400 16px/1 var(--serif);font-variant-numeric:tabular-nums;color:var(--ink);white-space:nowrap;padding:0 6px}
@@ -315,7 +316,7 @@ dialog.closing::backdrop{opacity:0}
   .clock-date{display:none}
   .tabbar{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;position:fixed;left:0;right:0;bottom:0;z-index:6;background:var(--surface);border-top:1px solid var(--rule);padding:4px 6px calc(4px + env(safe-area-inset-bottom))}
   .tabbar .tab{padding:12px 2px 8px;min-height:54px;font-size:15px;text-align:center}
-  .tabbar .ink{top:-3px}
+  .tabbar .ink{bottom:auto;top:-3px}
   .tabbar .badge{height:16px;min-width:16px;font-size:10px;margin-left:3px;padding:0 4px}
   .hero{grid-template-columns:1fr;padding:0 0 30px;gap:30px}
   .hero>.tiles{max-width:200px;margin-left:8px;padding:14px;border-width:8px;--gap:6px}
