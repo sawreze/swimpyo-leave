@@ -90,7 +90,12 @@ button{cursor:pointer;background:none;border:0;padding:0}
 .tabs::after{content:"";position:absolute;left:0;right:0;bottom:0;height:1px;background:var(--rule)}
 .tab{position:relative;flex:1;padding:2px 4px 12px;font:400 18px/1.2 var(--serif);letter-spacing:-.01em;color:var(--ink-3);min-height:44px;text-align:center}
 .tab:hover{color:var(--ink)}
-.tab[aria-current=page]{color:var(--ink)}
+.tab{text-shadow:0 0 0 transparent,0 0 0 transparent,0 0 0 transparent;transition:color .3s}
+/* 지금 메뉴 글자는 굵은 선과 함께 천천히 굵어지고, 떠난 메뉴는 천천히 가늘어집니다 */
+.tab[aria-current=page]{color:var(--ink);text-shadow:.4px 0 0 currentColor,-.4px 0 0 currentColor,0 .25px 0 currentColor;animation:boldIn .6s cubic-bezier(.22,1,.36,1)}
+.tab.unbold{animation:boldOut .45s ease-out}
+@keyframes boldIn{from{text-shadow:0 0 0 transparent,0 0 0 transparent,0 0 0 transparent;color:var(--ink-3)}}
+@keyframes boldOut{from{text-shadow:.4px 0 0 currentColor,-.4px 0 0 currentColor,0 .25px 0 currentColor;color:var(--ink)}}
 /* 지금 메뉴 위의 굵은 선: 메뉴를 옮기면 물방울처럼 늘어났다 뭉치며 따라갑니다 */
 .ink{position:absolute;z-index:1;bottom:-2px;left:0;height:5px;width:0;border-radius:99px;background:var(--rule);pointer-events:none;transform-origin:50% 50%}
 .badge{display:inline-grid;place-items:center;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--ink);color:var(--bg);font:400 12px/1 var(--serif);margin-left:6px;vertical-align:2px}
@@ -979,6 +984,10 @@ if (typeof module !== 'undefined') module.exports = Engine;
       if (!to.w) return;
       var ink = document.createElement('i'); ink.className = 'ink'; ink.setAttribute('aria-hidden', 'true'); box.appendChild(ink);
       ink.style.left = to.l + 'px'; ink.style.width = to.w + 'px';
+      var tabsHere = [].slice.call(box.querySelectorAll('.tab')), idx = tabsHere.indexOf(cur), pIdx = inkPrev[c[0] + '#'];
+      inkPrev[c[0] + '#'] = idx;
+      if (pIdx != null && pIdx !== idx && tabsHere[pIdx]) tabsHere[pIdx].classList.add('unbold');
+      else if (pIdx === idx) cur.style.animation = 'none';
       var from = inkPrev[c[0]]; inkPrev[c[0]] = to;
       if (calm()) return;
       if (!from) { ink.animate([{ transform: 'scaleX(0)' }, { transform: 'scaleX(1.06) scaleY(1.4)', offset: .55 }, { transform: 'none' }], { duration: 520, easing: 'cubic-bezier(.22,1,.36,1)' }); return; }
